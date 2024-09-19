@@ -1,14 +1,34 @@
 <!DOCTYPE html>
 <html>
-<head>
-  <title>Leet Lock</title>
-  <style>
-    body { width: 300px; }
-  </style>
-</head>
-<body>
-  <h1>Leet Lock</h1>
-  <p>You're currently not allowed to browse other sites. Solve a LeetCode problem to continue.</p>
-  <!-- Add options or links for the user to solve problems -->
-</body>
+  <head>
+    <title>Leet Lock</title>
+    <style>
+      body {
+        width: 300px;
+        font-family: Arial, sans-serif;
+      }
+      .status {
+        margin: 10px 0;
+      }
+      button {
+        padding: 10px;
+        background-color: #4CAF50;
+        color: white;
+        border: none;
+        cursor: pointer;
+        border-radius: 5px;
+        font-size: 14px;
+      }
+      button.locked {
+        background-color: #f44336;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Leet Lock</h1>
+    <p class="status">The browser is <span id="lock-status">locked</span>.</p>
+    <button id="toggle-lock">Unlock Browser</button>
+
+    <script src="popup.js"></script>
+  </body>
 </html>
