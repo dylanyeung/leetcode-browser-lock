@@ -3,7 +3,7 @@
     "name": "Leet Lock",
     "version": "1.0",
     "description": "A browser lock that requires solving a LeetCode problem before being able to access other sites.",
-    "permissions": ["tabs", "storage"],
+    "permissions": ["tabs", "storage", "notifications"],
     "background": {
       "service_worker": "background.js"
     },

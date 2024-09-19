@@ -1,34 +1,41 @@
 <!DOCTYPE html>
 <html>
-  <head>
+<head>
     <title>Leet Lock</title>
     <style>
-      body {
-        width: 300px;
-        font-family: Arial, sans-serif;
-      }
-      .status {
-        margin: 10px 0;
-      }
-      button {
-        padding: 10px;
-        background-color: #4CAF50;
-        color: white;
-        border: none;
-        cursor: pointer;
-        border-radius: 5px;
-        font-size: 14px;
-      }
-      button.locked {
-        background-color: #f44336;
-      }
+        body {
+            width: 300px;
+            font-family: Arial, sans-serif;
+        }
+        .status {
+            margin: 10px 0;
+        }
+        button {
+            padding: 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+        button.locked {
+            background-color: #f44336;
+        }
     </style>
-  </head>
-  <body>
+</head>
+<body>
     <h1>Leet Lock</h1>
     <p class="status">The browser is <span id="lock-status">locked</span>.</p>
     <button id="toggle-lock">Unlock Browser</button>
+    
+    <h2>Set Username</h2>
+    <input type="text" id="username-input" placeholder="Enter your LeetCode username">
+    <button id="set-username">Set Username</button>
+    
+    <h2>Stats</h2>
+    <p>Total Solved: <span id="total-solved">Loading...</span></p>
 
     <script src="popup.js"></script>
-  </body>
+</body>
 </html>
