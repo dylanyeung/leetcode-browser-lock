@@ -66,6 +66,13 @@ document.addEventListener("DOMContentLoaded", async function () {
   async function fetchAndDisplayTotalSolved(username) {
     if (!username) return;
     try {
+      console.log("Popup is fetching totalSolved...");
+      // Send log message to background.js
+      chrome.runtime.sendMessage({
+        action: "logMessage",
+        message: "Popup is fetching totalSolved...",
+      });
+
       const response = await fetch(
         `https://leetcode-api-faisalshohag.vercel.app/${username}`
       );
@@ -84,20 +91,11 @@ document.addEventListener("DOMContentLoaded", async function () {
     } catch (error) {
       console.error(`Error fetching totalSolved: ${error}`);
       totalSolvedText.textContent = "Error fetching data";
+      // Send error log message to background.js
+      chrome.runtime.sendMessage({
+        action: "logMessage",
+        message: `Error fetching totalSolved: ${error}`,
+      });
     }
   }
-
-  // Listen for URL changes
-  chrome.tabs.onUpdated.addListener(async function (tabId, changeInfo, tab) {
-    if (changeInfo.status === "complete" && tab.url) {
-      const currentUrl = new URL(tab.url);
-      const currentDomain = currentUrl.hostname;
-
-      // Check if the current domain is LeetCode
-      if (currentDomain === "leetcode.com") {
-        const { username } = await chrome.storage.local.get("username");
-        await fetchAndDisplayTotalSolved(username);
-      }
-    }
-  });
 });

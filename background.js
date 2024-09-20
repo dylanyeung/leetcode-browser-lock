@@ -7,6 +7,7 @@ async function fetchLeetCodeData(username) {
   try {
     const response = await fetch(`${API_BASE_URL}${username}`);
     if (response.ok) {
+      console.log("Background is fetching totalSolved...");
       return response.json();
     }
   } catch (error) {
@@ -40,7 +41,7 @@ async function checkForLeetCodeUpdate(username) {
   }
 
   // Check again every 30 seconds
-  setTimeout(() => checkForLeetCodeUpdate(username), 5000);
+  setTimeout(() => checkForLeetCodeUpdate(username), 30000);
 }
 
 function isInWhitelist(domain, fullUrl) {
@@ -85,6 +86,10 @@ chrome.runtime.onInstalled.addListener(async () => {
 
 // Listen for messages from popup.js
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  if (message.action === "logMessage") {
+    console.log(message.message); // Log messages from popup.js
+  }
+
   if (message.action === "updateTotalSolved") {
     if (message.totalSolved > lastTotalSolved) {
       lastTotalSolved = message.totalSolved;
