@@ -7,8 +7,8 @@ async function fetchLeetCodeData(username) {
   try {
     const response = await fetch(`${API_BASE_URL}${username}`);
     if (response.ok) {
-      console.log("Background is fetching totalSolved...");
-      return response.json();
+      const data = await response.json();
+      return data; // Return fetched data
     }
   } catch (error) {
     console.error(`Error fetching data: ${error}`);
@@ -35,13 +35,14 @@ async function checkForLeetCodeUpdate(username) {
       lastTotalSolved = currentTotalSolved;
       await chrome.storage.local.set({ isLocked: false }); // Unlock the browser
       console.log(
-        "Congratulations! You've solved a new LeetCode problem. The browser is now unlocked."
+        "You've solved a new LeetCode problem. CODE: INTERVAL"
       );
     }
   }
 
   // Check again every 30 seconds
   setTimeout(() => checkForLeetCodeUpdate(username), 30000);
+  console.log("Background will fetch totalSolved again in 30 seconds..."); // Log fetch interval
 }
 
 function isInWhitelist(domain, fullUrl) {
@@ -67,6 +68,27 @@ async function handleRedirection(tabId, tabUrl) {
 chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
   if (changeInfo.status === "complete" && tab.url) {
     handleRedirection(tabId, tab.url);
+
+    // Check for LeetCode URL and fetch totalSolved
+    const currentUrl = new URL(tab.url);
+    if (currentUrl.hostname === LEETCODE_DOMAIN) {
+      const { username, isLocked } = await chrome.storage.local.get([
+        "username",
+        "isLocked",
+      ]);
+      if (username) {
+        console.log("Background fetching totalSolved because of URL change...");
+        const data = await fetchLeetCodeData(username); // Fetch totalSolved on URL change
+        if (data && isLocked && data.totalSolved > lastTotalSolved) {
+          // Update lastTotalSolved and unlock the browser if locked
+          lastTotalSolved = data.totalSolved;
+          await chrome.storage.local.set({ isLocked: false });
+          console.log(
+            "You've solved a new LeetCode problem! CODE: URL"
+          );
+        }
+      }
+    }
   }
 });
 
@@ -95,7 +117,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       lastTotalSolved = message.totalSolved;
       chrome.storage.local.set({ isLocked: false }); // Unlock the browser
       console.log(
-        "Congratulations! You've solved a new LeetCode problem. The browser is now unlocked."
+        "You've solved a new LeetCode problem. CODE: POPUP"
       );
     }
   }
