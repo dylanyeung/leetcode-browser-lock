@@ -23,26 +23,33 @@ async function initializeLockStatus(username) {
       totalSolved: lastTotalSolved,
       isLocked: true,
     }); // Lock by default
-    checkForLeetCodeUpdate(username); // Start checking for updates
+    checkForLeetCodeUpdate(username); // Start checking for updates if locked
   }
 }
 
 async function checkForLeetCodeUpdate(username) {
+  const { isLocked } = await chrome.storage.local.get("isLocked");
+
+  if (!isLocked) {
+    console.log("Browser is unlocked. No need to fetch.");
+    return; // Exit early if the browser is unlocked
+  }
+
   const data = await fetchLeetCodeData(username);
   if (data) {
     const currentTotalSolved = data.totalSolved;
     if (currentTotalSolved > lastTotalSolved) {
       lastTotalSolved = currentTotalSolved;
       await chrome.storage.local.set({ isLocked: false }); // Unlock the browser
-      console.log(
-        "You've solved a new LeetCode problem. CODE: INTERVAL"
-      );
+      console.log("You've solved a new LeetCode problem. CODE: INTERVAL");
     }
   }
 
-  // Check again every 30 seconds
-  setTimeout(() => checkForLeetCodeUpdate(username), 30000);
-  console.log("Background will fetch totalSolved again in 30 seconds..."); // Log fetch interval
+  // Check again every 30 seconds if still locked
+  if (isLocked) {
+    setTimeout(() => checkForLeetCodeUpdate(username), 30000);
+    console.log("Background will fetch totalSolved again in 30 seconds...");
+  }
 }
 
 function isInWhitelist(domain, fullUrl) {
@@ -69,24 +76,19 @@ chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
   if (changeInfo.status === "complete" && tab.url) {
     handleRedirection(tabId, tab.url);
 
-    // Check for LeetCode URL and fetch totalSolved
-    const currentUrl = new URL(tab.url);
-    if (currentUrl.hostname === LEETCODE_DOMAIN) {
-      const { username, isLocked } = await chrome.storage.local.get([
-        "username",
-        "isLocked",
-      ]);
-      if (username) {
-        console.log("Background fetching totalSolved because of URL change...");
-        const data = await fetchLeetCodeData(username); // Fetch totalSolved on URL change
-        if (data && isLocked && data.totalSolved > lastTotalSolved) {
-          // Update lastTotalSolved and unlock the browser if locked
-          lastTotalSolved = data.totalSolved;
-          await chrome.storage.local.set({ isLocked: false });
-          console.log(
-            "You've solved a new LeetCode problem! CODE: URL"
-          );
-        }
+    // Only fetch totalSolved if the browser is locked
+    const { username, isLocked } = await chrome.storage.local.get([
+      "username",
+      "isLocked",
+    ]);
+
+    if (username && isLocked) {
+      console.log("Background fetching totalSolved because of URL change...");
+      const data = await fetchLeetCodeData(username); // Fetch totalSolved on URL change
+      if (data && data.totalSolved > lastTotalSolved) {
+        lastTotalSolved = data.totalSolved;
+        await chrome.storage.local.set({ isLocked: false });
+        console.log("You've solved a new LeetCode problem! CODE: URL");
       }
     }
   }
@@ -116,15 +118,14 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     if (message.totalSolved > lastTotalSolved) {
       lastTotalSolved = message.totalSolved;
       chrome.storage.local.set({ isLocked: false }); // Unlock the browser
-      console.log(
-        "You've solved a new LeetCode problem. CODE: POPUP"
-      );
+      console.log("You've solved a new LeetCode problem. CODE: POPUP");
     }
   }
 
-  // Log when the username is set
+  // Log when the username is set and start checking for updates
   if (message.action === "setUsername") {
     console.log(`Username set: ${message.username}`);
+    initializeLockStatus(message.username); // Fetch data after username is set
   }
 });
 
