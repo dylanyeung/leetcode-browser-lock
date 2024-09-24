@@ -2,6 +2,8 @@ const LEETCODE_DOMAIN = "leetcode.com";
 const domainWhiteList = ["leetcode.com", "google.com", "chrome://"];
 const API_BASE_URL = "https://leetcode-api-faisalshohag.vercel.app/";
 let lastTotalSolved = 0;
+const countdownHrs = 4;
+const countdownMins = 22;
 
 async function fetchLeetCodeData(username) {
   try {
@@ -127,6 +129,65 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     console.log(`Username set: ${message.username}`);
     initializeLockStatus(message.username); // Fetch data after username is set
   }
+});
+
+// Function to check if it's midnight and toggle lock status if needed
+async function checkMidnightLock() {
+  const now = new Date();
+  const isMidnight = now.getHours() === countdownHrs && now.getMinutes() === countdownMins;
+
+  console.log("Running midnight lock check:", now.toLocaleTimeString());
+
+  if (isMidnight) {
+    console.log("It's midnight! Checking lock status...");
+
+    const { isLocked } = await chrome.storage.local.get("isLocked");
+
+    if (!isLocked) {
+      console.log("Browser is unlocked at midnight. Locking the browser now...");
+      await chrome.storage.local.set({ isLocked: true });
+    } else {
+      console.log("Browser is already locked at midnight. No action needed.");
+    }
+  } else {
+    console.log("Browser opened past midnight. Locking the browser now...");
+    await chrome.storage.local.set({ isLocked: true });
+  }
+}
+
+// Function to schedule midnight lock check when the browser becomes active
+async function scheduleMidnightCheck() {
+  const now = new Date();
+  const nextMidnight = new Date(
+    now.getFullYear(),
+    now.getMonth(),
+    now.getDate() + (now.getHours() >= countdownHrs && now.getMinutes() >= countdownMins ? 1 : 0),
+    countdownHrs, // Target hour
+    countdownMins, // Target minute
+    0,  // Target second
+    0   // Target millisecond
+  );
+  const timeUntilMidnight = nextMidnight.getTime() - now.getTime();
+
+  console.log("Time until next midnight check:", timeUntilMidnight / 1000, "seconds");
+
+  setTimeout(async () => {
+    await checkMidnightLock();
+    scheduleMidnightCheck(); // Schedule the next check for the next midnight
+  }, timeUntilMidnight);
+}
+
+// Trigger midnight check when the browser is opened after inactivity
+chrome.runtime.onStartup.addListener(async () => {
+  console.log("Browser started, performing midnight lock check...");
+  await checkMidnightLock();
+  scheduleMidnightCheck(); // Schedule the next midnight check
+});
+
+// Schedule midnight check when the extension is loaded
+chrome.runtime.onInstalled.addListener(() => {
+  console.log("Extension installed or updated, scheduling midnight check...");
+  scheduleMidnightCheck();
 });
 
 // Listen for lock state toggling
