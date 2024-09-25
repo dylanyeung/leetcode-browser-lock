@@ -1,9 +1,7 @@
 const LEETCODE_DOMAIN = "leetcode.com";
 const domainWhiteList = ["leetcode.com", "google.com", "chrome://"];
 const API_BASE_URL = "https://leetcode-api-faisalshohag.vercel.app/";
-let lastTotalSolved = 0;
-const countdownHrs = 4;
-const countdownMins = 22;
+let lastTotalSolved = 0; // Assume this will be loaded from storage
 
 async function fetchLeetCodeData(username) {
   try {
@@ -17,16 +15,9 @@ async function fetchLeetCodeData(username) {
   }
 }
 
-async function initializeLockStatus(username) {
-  const data = await fetchLeetCodeData(username);
-  if (data) {
-    lastTotalSolved = data.totalSolved;
-    await chrome.storage.local.set({
-      totalSolved: lastTotalSolved,
-      isLocked: true,
-    }); // Lock by default
-    checkForLeetCodeUpdate(username); // Start checking for updates if locked
-  }
+async function loadLastTotalSolved() {
+  const { totalSolved } = await chrome.storage.local.get("totalSolved");
+  lastTotalSolved = totalSolved !== undefined ? totalSolved : 0; // Default to 0 if not set
 }
 
 async function checkForLeetCodeUpdate(username) {
@@ -42,7 +33,10 @@ async function checkForLeetCodeUpdate(username) {
     const currentTotalSolved = data.totalSolved;
     if (currentTotalSolved > lastTotalSolved) {
       lastTotalSolved = currentTotalSolved;
-      await chrome.storage.local.set({ isLocked: false }); // Unlock the browser
+      await chrome.storage.local.set({ 
+        isLocked: false,
+        totalSolved: lastTotalSolved, // Store the updated totalSolved value
+      }); 
       console.log("You've solved a new LeetCode problem. CODE: INTERVAL");
     }
   }
@@ -74,9 +68,13 @@ async function handleRedirection(tabId, tabUrl) {
   }
 }
 
+// Update the onUpdated event to remove initialization check
 chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
   if (changeInfo.status === "complete" && tab.url) {
     handleRedirection(tabId, tab.url);
+
+    // Load lastTotalSolved from storage on each URL update
+    await loadLastTotalSolved();
 
     // Only fetch totalSolved if the browser is locked
     const { username, isLocked } = await chrome.storage.local.get([
@@ -89,7 +87,10 @@ chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
       const data = await fetchLeetCodeData(username); // Fetch totalSolved on URL change
       if (data && data.totalSolved > lastTotalSolved) {
         lastTotalSolved = data.totalSolved;
-        await chrome.storage.local.set({ isLocked: false });
+        await chrome.storage.local.set({ 
+          isLocked: false,
+          totalSolved: lastTotalSolved, // Store the updated totalSolved value
+        });
         console.log("You've solved a new LeetCode problem! CODE: URL");
       }
     }
@@ -106,7 +107,9 @@ chrome.tabs.onActivated.addListener(async (activeInfo) => {
 chrome.runtime.onInstalled.addListener(async () => {
   const { username } = await chrome.storage.local.get("username");
   if (username) {
-    initializeLockStatus(username); // Initialize lock status based on stored username
+    await loadLastTotalSolved(); // Load lastTotalSolved on installation
+    await chrome.storage.local.set({ isLocked: true }); // Lock by default
+    checkForLeetCodeUpdate(username); // Start checking for updates
   }
 });
 
@@ -119,7 +122,10 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.action === "updateTotalSolved") {
     if (message.totalSolved > lastTotalSolved) {
       lastTotalSolved = message.totalSolved;
-      chrome.storage.local.set({ isLocked: false }); // Unlock the browser
+      chrome.storage.local.set({ 
+        isLocked: false,
+        totalSolved: lastTotalSolved, // Store the updated totalSolved value
+      }); // Unlock the browser
       console.log("You've solved a new LeetCode problem. CODE: POPUP");
     }
   }
@@ -127,67 +133,8 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   // Log when the username is set and start checking for updates
   if (message.action === "setUsername") {
     console.log(`Username set: ${message.username}`);
-    initializeLockStatus(message.username); // Fetch data after username is set
+    loadLastTotalSolved().then(() => checkForLeetCodeUpdate(message.username)); // Fetch data after username is set
   }
-});
-
-// Function to check if it's midnight and toggle lock status if needed
-async function checkMidnightLock() {
-  const now = new Date();
-  const isMidnight = now.getHours() === countdownHrs && now.getMinutes() === countdownMins;
-
-  console.log("Running midnight lock check:", now.toLocaleTimeString());
-
-  if (isMidnight) {
-    console.log("It's midnight! Checking lock status...");
-
-    const { isLocked } = await chrome.storage.local.get("isLocked");
-
-    if (!isLocked) {
-      console.log("Browser is unlocked at midnight. Locking the browser now...");
-      await chrome.storage.local.set({ isLocked: true });
-    } else {
-      console.log("Browser is already locked at midnight. No action needed.");
-    }
-  } else {
-    console.log("Browser opened past midnight. Locking the browser now...");
-    await chrome.storage.local.set({ isLocked: true });
-  }
-}
-
-// Function to schedule midnight lock check when the browser becomes active
-async function scheduleMidnightCheck() {
-  const now = new Date();
-  const nextMidnight = new Date(
-    now.getFullYear(),
-    now.getMonth(),
-    now.getDate() + (now.getHours() >= countdownHrs && now.getMinutes() >= countdownMins ? 1 : 0),
-    countdownHrs, // Target hour
-    countdownMins, // Target minute
-    0,  // Target second
-    0   // Target millisecond
-  );
-  const timeUntilMidnight = nextMidnight.getTime() - now.getTime();
-
-  console.log("Time until next midnight check:", timeUntilMidnight / 1000, "seconds");
-
-  setTimeout(async () => {
-    await checkMidnightLock();
-    scheduleMidnightCheck(); // Schedule the next check for the next midnight
-  }, timeUntilMidnight);
-}
-
-// Trigger midnight check when the browser is opened after inactivity
-chrome.runtime.onStartup.addListener(async () => {
-  console.log("Browser started, performing midnight lock check...");
-  await checkMidnightLock();
-  scheduleMidnightCheck(); // Schedule the next midnight check
-});
-
-// Schedule midnight check when the extension is loaded
-chrome.runtime.onInstalled.addListener(() => {
-  console.log("Extension installed or updated, scheduling midnight check...");
-  scheduleMidnightCheck();
 });
 
 // Listen for lock state toggling
@@ -200,4 +147,16 @@ chrome.storage.onChanged.addListener((changes, areaName) => {
       console.log("The browser is now unlocked.");
     }
   }
+});
+
+// Store totalSolved before the extension or browser closes
+chrome.runtime.onSuspend.addListener(async () => {
+  console.log("Extension is being suspended. Saving totalSolved...");
+  await chrome.storage.local.set({ totalSolved: lastTotalSolved });
+});
+
+// Alternatively, store totalSolved when all browser windows are closed
+chrome.windows.onRemoved.addListener(async () => {
+  console.log("All browser windows are closed. Saving totalSolved...");
+  await chrome.storage.local.set({ totalSolved: lastTotalSolved });
 });
