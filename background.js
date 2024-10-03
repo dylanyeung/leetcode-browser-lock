@@ -162,8 +162,14 @@ async function lockBrowser() {
 // Alarm listener for the lock alarm
 chrome.alarms.onAlarm.addListener(async (alarm) => {
   if (alarm.name === ALARM_NAME) {
-    const { [STORAGE_KEY]: scheduledTime } = await chrome.storage.local.get(STORAGE_KEY);
-    console.log(`Lock alarm triggered, locking the browser at scheduled UTC time: ${new Date(scheduledTime).toUTCString()}.`);
+    const { [STORAGE_KEY]: scheduledTime } = await chrome.storage.local.get(
+      STORAGE_KEY
+    );
+    console.log(
+      `Lock alarm triggered, locking the browser at scheduled UTC time: ${new Date(
+        scheduledTime
+      ).toUTCString()}.`
+    );
     lockBrowser();
     await scheduleDailyAlarm(); // Reschedule the alarm for the next day
   }
@@ -171,7 +177,9 @@ chrome.alarms.onAlarm.addListener(async (alarm) => {
 
 // Check alarm state on startup
 async function checkAlarmState() {
-  const { [STORAGE_KEY]: scheduledTime } = await chrome.storage.local.get(STORAGE_KEY);
+  const { [STORAGE_KEY]: scheduledTime } = await chrome.storage.local.get(
+    STORAGE_KEY
+  );
   const alarm = await chrome.alarms.get(ALARM_NAME);
 
   if (alarm && scheduledTime) {

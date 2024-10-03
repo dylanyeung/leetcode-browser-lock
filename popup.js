@@ -1,6 +1,7 @@
 document.addEventListener("DOMContentLoaded", async function () {
   const setUsernameButton = document.getElementById("set-username");
   const usernameInput = document.getElementById("username-input");
+  const usernameStatusText = document.getElementById("username-status");
   const lockStatusText = document.getElementById("lock-status");
   const toggleLockButton = document.getElementById("toggle-lock");
   const totalSolvedText = document.getElementById("total-solved");
@@ -13,9 +14,11 @@ document.addEventListener("DOMContentLoaded", async function () {
     "username",
   ]);
   updateUI(isLocked);
-  
+
   // Attempt to retrieve the next alarm time in local time
-  const { [STORAGE_KEY]: scheduledTime } = await chrome.storage.local.get(STORAGE_KEY);
+  const { [STORAGE_KEY]: scheduledTime } = await chrome.storage.local.get(
+    STORAGE_KEY
+  );
   if (scheduledTime) {
     const scheduledDate = new Date(scheduledTime);
     const currentTime = new Date();
@@ -23,15 +26,20 @@ document.addEventListener("DOMContentLoaded", async function () {
     // Calculate the time difference
     const timeDiffMs = scheduledDate - currentTime;
     const hoursUntilAlarm = Math.floor(timeDiffMs / (1000 * 60 * 60));
-    const minutesUntilAlarm = Math.floor((timeDiffMs % (1000 * 60 * 60)) / (1000 * 60));
+    const minutesUntilAlarm = Math.floor(
+      (timeDiffMs % (1000 * 60 * 60)) / (1000 * 60)
+    );
 
     // Format the scheduled time in local time format
     const formattedScheduledTime = scheduledDate.toLocaleString("en-US", {
       timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
     });
 
-    // Update the next alarm text
-    nextAlarmText.textContent = `${hoursUntilAlarm} hours and ${minutesUntilAlarm} minutes until alarm at ${formattedScheduledTime}`;
+    // Create a better formatted alarm text
+    const hourLabel = hoursUntilAlarm === 1 ? "hour" : "hours";
+    const minuteLabel = minutesUntilAlarm === 1 ? "minute" : "minutes";
+
+    nextAlarmText.innerHTML = `Next alarm in <span class="time-remaining">${hoursUntilAlarm} ${hourLabel} and ${minutesUntilAlarm} ${minuteLabel}</span>, scheduled for <span class="scheduled-time">${formattedScheduledTime}</span>.`;
   } else {
     console.log("no alarm exists");
     nextAlarmText.textContent = "No alarm scheduled.";
@@ -48,12 +56,12 @@ document.addEventListener("DOMContentLoaded", async function () {
     const username = usernameInput.value.trim();
     if (username) {
       await chrome.storage.local.set({ username });
-      lockStatusText.textContent = `Username "${username}" set successfully!`;
+      usernameStatusText.textContent = `Username "${username}" set successfully!`;
       // Send the username setting action to background.js
       chrome.runtime.sendMessage({ action: "setUsername", username });
       await fetchAndDisplayTotalSolved(username);
     } else {
-      lockStatusText.textContent = "Please enter a valid username.";
+      usernameStatusText.textContent = "Please enter a valid username.";
     }
   });
 

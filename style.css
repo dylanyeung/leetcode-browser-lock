@@ -1,0 +1,114 @@
+/* Body Styles */
+body {
+  width: 320px; /* Set the width of the popup window */
+  font-family: "Arial", sans-serif; /* Use Arial font for the body */
+  background-color: #f4f4f9; /* Light gray background for the body */
+  color: #333; /* Dark gray text color for readability */
+  padding: 15px; /* Padding around the content inside the body */
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* Light shadow for a subtle 3D effect */
+  border-radius: 8px; /* Rounded corners for a softer look */
+}
+
+/* Header Styles */
+h1 {
+  font-size: 24px; /* Set the size of the main heading */
+  margin-bottom: 10px; /* Space below the heading */
+  color: #555; /* Medium gray color for the heading text */
+  text-align: center; /* Center-align the heading */
+}
+
+/* Status Styles */
+p.status {
+  margin: 10px 0; /* Vertical space around the status text */
+  font-size: 16px; /* Font size for status text */
+}
+
+/* Button Styles */
+button {
+  padding: 10px; /* Padding inside buttons */
+  background-color: #4caf50; /* Green background for the button */
+  color: white; /* White text color for the button */
+  border: none; /* Remove the default border from the button */
+  cursor: pointer; /* Change cursor to pointer on hover */
+  border-radius: 5px; /* Rounded corners for buttons */
+  font-size: 14px; /* Font size for button text */
+  transition: background-color 0.3s, transform 0.2s; /* Smooth transitions for background color and transform */
+  width: 100%; /* Make the button take full width of its container */
+}
+
+button:hover {
+  background-color: #45a049; /* Darker green when hovering over the button */
+  transform: translateY(-1px); /* Slight upward movement on hover */
+}
+
+button.locked {
+  background-color: #f44336; /* Red background for locked state */
+}
+
+button.locked:hover {
+  background-color: #e53935; /* Darker red on hover for locked button */
+}
+
+/* Subheader Styles */
+h2 {
+  font-size: 18px; /* Set the size of subheadings */
+  margin-top: 20px; /* Add space above subheadings */
+  color: #555; /* Medium gray color for subheading text */
+}
+
+/* Input Field Styles */
+input[type="text"] {
+  width: calc(100% - 20px); /* Full width minus padding for text input */
+  padding: 10px; /* Padding inside the text input field */
+  border: 1px solid #ddd; /* Light gray border around the text input */
+  border-radius: 5px; /* Rounded corners for input field */
+  margin-top: 10px; /* Space above the input field */
+  font-size: 14px; /* Font size for input text */
+}
+
+input[type="text"]:focus {
+  outline: none; /* Remove the default outline when the input is focused */
+  border-color: #4caf50; /* Green border when input is focused */
+}
+
+/* Stats Container Styles */
+.stats-container {
+  background-color: #f9f9f9; /* Light gray background for the stats section */
+  border: 1px solid #ddd; /* Light border around the stats section */
+  padding: 10px; /* Padding inside the stats container */
+  border-radius: 5px; /* Rounded corners for the stats container */
+  margin-top: 10px; /* Space above the stats section */
+}
+
+/* Total Solved Styles */
+#total-solved {
+  font-weight: bold; /* Bold text for total solved problems */
+  font-size: 18px; /* Larger font size for emphasis */
+  color: #4caf50; /* Green color for total solved text */
+  background-color: #e8f5e9; /* Light green background for contrast */
+  padding: 5px; /* Padding inside the total solved box */
+  border-radius: 4px; /* Rounded corners for the total solved box */
+  display: inline-block; /* Allows padding to apply correctly */
+  margin-left: 5px; /* Space between the label and the value */
+}
+
+/* Next Alarm Styles */
+.next-alarm {
+  font-size: 16px; /* Font size for next alarm text */
+  margin-top: 10px; /* Space above the next alarm section */
+  padding: 10px; /* Padding inside the next alarm section */
+  background-color: #f0f0f0; /* Light gray background for the next alarm section */
+  border-left: 5px solid #4caf50; /* Green left border for emphasis */
+  border-radius: 5px; /* Rounded corners for the next alarm section */
+  color: #333; /* Dark text color for readability */
+}
+
+.next-alarm .time-remaining {
+  font-weight: bold; /* Bold text for time remaining */
+  color: #4caf50; /* Green color for time remaining */
+}
+
+.next-alarm .scheduled-time {
+  font-style: italic; /* Italicize the scheduled time */
+  color: #555; /* Medium gray color for the scheduled time */
+}
