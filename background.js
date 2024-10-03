@@ -6,7 +6,7 @@ let lastTotalSolved = 0; // Assume this will be loaded from storage
 // Parameters for the daily lock alarm
 const ALARM_NAME = "lockAlarm";
 const STORAGE_KEY = "alarm-scheduled-time";
-// Alarm times used for debugging
+// Set alarm times
 const UTC_HOUR = 0; // Midnight UTC (hour)
 const UTC_MINUTE = 0; // Midnight UTC (minute)
 
@@ -151,9 +151,12 @@ async function scheduleDailyAlarm() {
 }
 
 // Lock the browser when the alarm fires
-function lockBrowser() {
-  chrome.storage.local.set({ isLocked: true });
-  console.log("Browser locked due to daily alarm.");
+async function lockBrowser() {
+  const { username } = await chrome.storage.local.get("username");
+  if (username) {
+    chrome.storage.local.set({ isLocked: true });
+    console.log("Browser locked due to function call.");
+  } else console.log("Username not set. Do nothing");
 }
 
 // Alarm listener for the lock alarm
@@ -170,7 +173,7 @@ chrome.alarms.onAlarm.addListener(async (alarm) => {
 async function checkAlarmState() {
   const { [STORAGE_KEY]: scheduledTime } = await chrome.storage.local.get(STORAGE_KEY);
   const alarm = await chrome.alarms.get(ALARM_NAME);
-  
+
   if (alarm && scheduledTime) {
     const currentTime = Date.now();
 
