@@ -19,8 +19,8 @@ h1 {
 
 /* Status Styles */
 p.status {
-  margin: 10px 0; /* Vertical space around the status text */
-  font-size: 16px; /* Font size for status text */
+  margin-top: 25px; /* Add space above status text */
+  font-size: 15px; /* Font size for status text */
 }
 
 /* Button Styles */
@@ -62,7 +62,6 @@ input[type="text"] {
   padding: 10px; /* Padding inside the text input field */
   border: 1px solid #ddd; /* Light gray border around the text input */
   border-radius: 5px; /* Rounded corners for input field */
-  margin-top: 10px; /* Space above the input field */
   font-size: 14px; /* Font size for input text */
 }
 
@@ -83,7 +82,7 @@ input[type="text"]:focus {
 /* Total Solved Styles */
 #total-solved {
   font-weight: bold; /* Bold text for total solved problems */
-  font-size: 18px; /* Larger font size for emphasis */
+  font-size: 15px; /* Larger font size for emphasis */
   color: #4caf50; /* Green color for total solved text */
   background-color: #e8f5e9; /* Light green background for contrast */
   padding: 5px; /* Padding inside the total solved box */
@@ -93,8 +92,8 @@ input[type="text"]:focus {
 }
 
 /* Next Alarm Styles */
-.next-alarm {
-  font-size: 16px; /* Font size for next alarm text */
+.daily-lock {
+  font-size: 15px; /* Font size for next alarm text */
   margin-top: 10px; /* Space above the next alarm section */
   padding: 10px; /* Padding inside the next alarm section */
   background-color: #f0f0f0; /* Light gray background for the next alarm section */
@@ -103,12 +102,12 @@ input[type="text"]:focus {
   color: #333; /* Dark text color for readability */
 }
 
-.next-alarm .time-remaining {
+.daily-lock .time-remaining {
   font-weight: bold; /* Bold text for time remaining */
   color: #4caf50; /* Green color for time remaining */
 }
 
-.next-alarm .scheduled-time {
+.daily-lock .scheduled-time {
   font-style: italic; /* Italicize the scheduled time */
   color: #555; /* Medium gray color for the scheduled time */
 }

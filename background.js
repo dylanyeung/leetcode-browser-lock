@@ -6,6 +6,9 @@ let lastTotalSolved = 0; // Assume this will be loaded from storage
 // Parameters for the daily lock alarm
 const ALARM_NAME = "lockAlarm";
 const STORAGE_KEY = "alarm-scheduled-time";
+const UNLOCK_ALARM_NAME = "unlockAlarm";
+const UNLOCK_USED_TODAY_KEY = "unlockUsedToday";
+const UNLOCK_EXPIRATION_KEY = "unlockExpirationTime";
 // Set alarm times
 const UTC_HOUR = 0; // Midnight UTC (hour)
 const UTC_MINUTE = 0; // Midnight UTC (minute)
@@ -161,6 +164,15 @@ async function lockBrowser() {
 
 // Alarm listener for the lock alarm
 chrome.alarms.onAlarm.addListener(async (alarm) => {
+  if (alarm.name === UNLOCK_ALARM_NAME) {
+    chrome.storage.local.set({ isLocked: true });
+    console.log("Lock alarm triggered after unlock period.");
+  } else if (alarm.name === ALARM_NAME) {
+    chrome.storage.local.set({ isLocked: true, unlockUsedToday: false });
+    console.log("Daily lock alarm triggered. Browser locked and unlock usage reset.");
+    scheduleDailyAlarm();
+  }
+
   if (alarm.name === ALARM_NAME) {
     const { [STORAGE_KEY]: scheduledTime } = await chrome.storage.local.get(
       STORAGE_KEY
@@ -202,7 +214,7 @@ async function checkAlarmState() {
 
 // Extension installed or started, schedule the daily lock alarm
 chrome.runtime.onInstalled.addListener(async (details) => {
-  console.log("Extension installed. Scheduling daily alarm...");
+  console.log("Extension started. Scheduling daily alarm...");
   await scheduleDailyAlarm();
 
   const { username } = await chrome.storage.local.get("username");
@@ -221,6 +233,13 @@ chrome.runtime.onStartup.addListener(async () => {
 
 // Listen for messages from popup.js
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  if (message.action === "setUnlockAlarm") {
+    const unlockExpirationTime = message.unlockExpirationTime;
+    chrome.alarms.create(UNLOCK_ALARM_NAME, {
+      when: unlockExpirationTime,
+    });
+  }
+
   if (message.action === "logMessage") {
     console.log(message.message); // Log messages from popup.js
   }

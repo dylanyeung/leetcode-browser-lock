@@ -5,14 +5,18 @@ document.addEventListener("DOMContentLoaded", async function () {
   const lockStatusText = document.getElementById("lock-status");
   const toggleLockButton = document.getElementById("toggle-lock");
   const totalSolvedText = document.getElementById("total-solved");
-  const nextAlarmText = document.getElementById("next-alarm");
+  const dailyLockText = document.getElementById("daily-lock");
   const STORAGE_KEY = "alarm-scheduled-time";
+  const UNLOCK_EXPIRATION_KEY = "unlockExpirationTime";
+  const UNLOCK_USED_TODAY_KEY = "unlockUsedToday";
+  const unlockTimer = 1; // Number of minutes the button unlocks the browser for
 
-  // Initialize lock status and username from storage
-  const { isLocked, username } = await chrome.storage.local.get([
-    "isLocked",
-    "username",
-  ]);
+  // Initialize lock status, unlock status, and username from storage
+  const { isLocked, username, unlockUsedToday } = await chrome.storage.local.get([
+      "isLocked",
+      "username",
+      UNLOCK_USED_TODAY_KEY,
+    ]);
   updateUI(isLocked);
 
   // Attempt to retrieve the next alarm time in local time
@@ -39,10 +43,14 @@ document.addEventListener("DOMContentLoaded", async function () {
     const hourLabel = hoursUntilAlarm === 1 ? "hour" : "hours";
     const minuteLabel = minutesUntilAlarm === 1 ? "minute" : "minutes";
 
-    nextAlarmText.innerHTML = `Next alarm in <span class="time-remaining">${hoursUntilAlarm} ${hourLabel} and ${minutesUntilAlarm} ${minuteLabel}</span>, scheduled for <span class="scheduled-time">${formattedScheduledTime}</span>.`;
+    dailyLockText.innerHTML =
+      `The next lock will occur in <span class="time-remaining">
+      ${hoursUntilAlarm} ${hourLabel} ${hoursUntilAlarm > 1 ? 'hours' : 'hour'} and 
+      ${minutesUntilAlarm} ${minuteLabel} ${minutesUntilAlarm > 1 ? 'minutes' : 'minute'}</span>.\n<span class="scheduled-time">
+      ${formattedScheduledTime}</span>`;
   } else {
     console.log("no alarm exists");
-    nextAlarmText.textContent = "No alarm scheduled.";
+    dailyLockText.textContent = "No alarm scheduled.";
   }
 
   // Set initial username input value if it exists
@@ -67,18 +75,48 @@ document.addEventListener("DOMContentLoaded", async function () {
 
   // Handle the toggle lock button click
   toggleLockButton.addEventListener("click", async () => {
-    const { isLocked } = await chrome.storage.local.get("isLocked");
-    const newLockStatus = !isLocked;
+    const { isLocked, unlockUsedToday, unlockExpirationTime } =
+      await chrome.storage.local.get([
+        "isLocked",
+        UNLOCK_USED_TODAY_KEY,
+        UNLOCK_EXPIRATION_KEY,
+      ]);
 
-    // Store the new lock status in chrome storage
-    await chrome.storage.local.set({ isLocked: newLockStatus });
+    const currentTime = Date.now();
 
-    // Update UI accordingly
-    updateUI(newLockStatus);
+    // Check if the browser is currently locked or unlocked
+    if (isLocked) {
+      // If locked, check if the unlock button has been used today
+      if (unlockUsedToday) {
+        toggleLockButton.disabled = true;
+        lockStatusText.textContent = "locked. Today's free unlock has already been used and will reset after the daily lock";
+        return;
+      }
+
+      // Unlock and set unlock expiration 30 minutes from now
+      const unlockExpirationTime = currentTime + unlockTimer * 60 * 1000;
+      await chrome.storage.local.set({
+        isLocked: false,
+        unlockUsedToday: true,
+        unlockExpirationTime,
+      });
+      updateUI(false);
+
+      // Send a message to background.js to set a lock alarm
+      chrome.runtime.sendMessage({
+        action: "setUnlockAlarm",
+        unlockExpirationTime,
+      });
+    } else {
+      // If already unlocked, allow relocking without restrictions
+      await chrome.storage.local.set({ isLocked: true });
+      updateUI(true);
+    }
+
     // Send the toggle lock action to background.js
     chrome.runtime.sendMessage({
       action: "toggleLock",
-      isLocked: newLockStatus,
+      isLocked: !isLocked,
     });
   });
 
@@ -88,6 +126,7 @@ document.addEventListener("DOMContentLoaded", async function () {
       lockStatusText.textContent = "locked";
       toggleLockButton.textContent = "Unlock Browser";
       toggleLockButton.classList.add("locked");
+      toggleLockButton.disabled = false;
     } else {
       lockStatusText.textContent = "unlocked";
       toggleLockButton.textContent = "Lock Browser";
@@ -122,7 +161,6 @@ document.addEventListener("DOMContentLoaded", async function () {
         totalSolvedText.textContent = "Error fetching data";
       }
     } catch (error) {
-      console.error(`Error fetching totalSolved: ${error}`);
       totalSolvedText.textContent = "Error fetching data";
       // Send error log message to background.js
       chrome.runtime.sendMessage({
