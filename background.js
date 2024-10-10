@@ -153,6 +153,18 @@ async function scheduleDailyAlarm() {
   await chrome.storage.local.set({ [STORAGE_KEY]: nextMidnightUTC.getTime() });
 }
 
+function deleteAlarm(alarmName, sendResponse){
+  chrome.alarms.clear(alarmName, (wasCleared) => {
+    if (wasCleared) {
+      console.log(`${alarmName} deleted successfully.`);
+      sendResponse({ success: true });
+    } else {
+      console.log(`No ${alarmName} found to delete.`);
+      sendResponse({ success: false });
+    }
+  });
+}
+
 // Lock the browser when the alarm fires
 async function lockBrowser() {
   const { username } = await chrome.storage.local.get("username");
@@ -238,6 +250,11 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     chrome.alarms.create(UNLOCK_ALARM_NAME, {
       when: unlockExpirationTime,
     });
+  }
+
+  if (message.action === "deleteUnlockAlarm") {
+    deleteAlarm(UNLOCK_ALARM_NAME, sendResponse);
+    return true;
   }
 
   if (message.action === "logMessage") {

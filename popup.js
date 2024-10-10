@@ -9,10 +9,11 @@ document.addEventListener("DOMContentLoaded", async function () {
   const STORAGE_KEY = "alarm-scheduled-time";
   const UNLOCK_EXPIRATION_KEY = "unlockExpirationTime";
   const UNLOCK_USED_TODAY_KEY = "unlockUsedToday";
-  const unlockTimer = 1; // Number of minutes the button unlocks the browser for
+  const unlockTimer = 30; // Number of minutes the button unlocks the browser for
 
   // Initialize lock status, unlock status, and username from storage
-  const { isLocked, username, unlockUsedToday } = await chrome.storage.local.get([
+  const { isLocked, username, unlockUsedToday } =
+    await chrome.storage.local.get([
       "isLocked",
       "username",
       UNLOCK_USED_TODAY_KEY,
@@ -43,10 +44,13 @@ document.addEventListener("DOMContentLoaded", async function () {
     const hourLabel = hoursUntilAlarm === 1 ? "hour" : "hours";
     const minuteLabel = minutesUntilAlarm === 1 ? "minute" : "minutes";
 
-    dailyLockText.innerHTML =
-      `The next lock will occur in <span class="time-remaining">
-      ${hoursUntilAlarm} ${hourLabel} ${hoursUntilAlarm > 1 ? 'hours' : 'hour'} and 
-      ${minutesUntilAlarm} ${minuteLabel} ${minutesUntilAlarm > 1 ? 'minutes' : 'minute'}</span>.\n<span class="scheduled-time">
+    dailyLockText.innerHTML = `The next lock will occur in <span class="time-remaining">
+      ${hoursUntilAlarm} ${hourLabel} ${
+      hoursUntilAlarm > 1 ? "hours" : "hour"
+    } and 
+      ${minutesUntilAlarm} ${minuteLabel} ${
+      minutesUntilAlarm > 1 ? "minutes" : "minute"
+    }</span>.\n<span class="scheduled-time">
       ${formattedScheduledTime}</span>`;
   } else {
     console.log("no alarm exists");
@@ -89,7 +93,8 @@ document.addEventListener("DOMContentLoaded", async function () {
       // If locked, check if the unlock button has been used today
       if (unlockUsedToday) {
         toggleLockButton.disabled = true;
-        lockStatusText.textContent = "locked. Today's free unlock has already been used and will reset after the daily lock";
+        lockStatusText.textContent =
+          "locked. Today's free unlock has already been used and will reset after the daily lock";
         return;
       }
 
@@ -108,6 +113,10 @@ document.addEventListener("DOMContentLoaded", async function () {
         unlockExpirationTime,
       });
     } else {
+      // Send a message to background.js to delete lock alarm
+      chrome.runtime.sendMessage({
+        action: "deleteUnlockAlarm",
+      });
       // If already unlocked, allow relocking without restrictions
       await chrome.storage.local.set({ isLocked: true });
       updateUI(true);
@@ -121,14 +130,29 @@ document.addEventListener("DOMContentLoaded", async function () {
   });
 
   // Function to update the UI based on the lock status
-  function updateUI(isLocked) {
+  async function updateUI(isLocked) {
+    const { unlockUsedToday } = await chrome.storage.local.get(
+      "unlockUsedToday"
+    );
     if (isLocked) {
-      lockStatusText.textContent = "locked";
+      if (unlockUsedToday) {
+        lockStatusText.textContent =
+          "locked. Today's free unlock has already been used and will reset after the daily lock";
+      } else {
+        lockStatusText.textContent =
+          "locked. The browser can be manually unlocked for 30 minutes once daily";
+      }
       toggleLockButton.textContent = "Unlock Browser";
       toggleLockButton.classList.add("locked");
       toggleLockButton.disabled = false;
     } else {
-      lockStatusText.textContent = "unlocked";
+      if (unlockUsedToday) {
+        lockStatusText.textContent = `unlocked until ${formatLocalTime(
+          Date.now() + unlockTimer * 60 * 1000
+        )}`;
+      } else {
+        lockStatusText.textContent = "unlocked";
+      }
       toggleLockButton.textContent = "Lock Browser";
       toggleLockButton.classList.remove("locked");
     }
@@ -168,5 +192,21 @@ document.addEventListener("DOMContentLoaded", async function () {
         message: `Error fetching totalSolved: ${error}`,
       });
     }
+  }
+
+  function formatLocalTime(time) {
+    const date = new Date(time);
+
+    let hours = date.getHours();
+    const minutes = date.getMinutes();
+
+    const ampm = hours >= 12 ? "PM" : "AM";
+    hours = hours % 12; // Convert to 12-hour format
+    hours = hours ? hours : 12; // Adjust for 0 hour to display as 12
+
+    // Format minutes to always have two digits
+    const formattedMinutes = minutes < 10 ? "0" + minutes : minutes;
+
+    return `${hours}:${formattedMinutes} ${ampm}`;
   }
 });
