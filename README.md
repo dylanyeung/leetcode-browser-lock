@@ -14,11 +14,12 @@ Leet Lock is a productivity-focused Chrome extension designed to encourage consi
 ## Technology Stack
 
 - **JavaScript**: The primary programming language used for developing the extension, including the logic for the popup interface, background scripts, and Chrome API integration.
-- **HTML/CSS**: Provides the structure and styling for the popup interface, ensuring a clean and user-friendly design.
+- **HTML5**: Markup language used to structure the popup interface.
+- **CSS3**: Styling language used for customizing the appearance of the popup, ensuring a polished user interface.
 - **Chrome Storage API**: Enables persistent data storage, such as the lock status, unlock expiration time, and user settings. Data retrieval and updates are efficiently managed using asynchronous operations with promises.
 - **Chrome Alarms API**: Schedules background tasks for daily locks and temporary unlocks. Implements event-driven programming by listening for alarm events to update the lock status and reset daily metrics.
 - **Chrome Runtime API**: Handles messaging between the background script and popup interface to synchronize lock status changes and user actions.
-- **LeetCode API**: Uses the [unofficial LeetCode API](https://github.com/faisal-shohag/leetcode_api) by Faisal Shohag to fetch the number of solved problems, with secure asynchronous requests made through `fetch()`.
+- **LeetCode API**: Uses the [LeetCode API](https://github.com/faisal-shohag/leetcode_api) by Faisal Shohag to fetch the number of solved problems, with secure asynchronous requests made through `fetch()`.
 
 ## Features
 
@@ -53,7 +54,7 @@ Leet Lock is a productivity-focused Chrome extension designed to encourage consi
 
 1. Clone the repository:
     ```bash
-    git clone <your-repository-url>
+    git clone https://github.com/dylanyeung/leetcode-browser-lock/
     ```
 2. Open Chrome and navigate to `chrome://extensions/`.
 3. Enable "Developer mode" in the top-right corner.
@@ -65,6 +66,7 @@ Leet Lock is a productivity-focused Chrome extension designed to encourage consi
 - `popup.js`: Handles events and logic for the popup interface, such as user interactions, fetching LeetCode data, and controlling lock states.
 - `popup.html`: Defines the HTML structure for the popup interface, including elements for lock status, unlock buttons, and user input.
 - `style.css`: Provides custom styles for the popup interface to ensure a polished and user-friendly appearance.
+- `assets/`: Contains icon image used for the extension and UI screenshots.
 
 ## Credits
 This project utilizes the [LeetCode API](https://github.com/faisal-shohag/leetcode_api) created by Faisal Shohag to fetch the number of solved problems. Special thanks to Faisal Shohag for providing this API to the community.
