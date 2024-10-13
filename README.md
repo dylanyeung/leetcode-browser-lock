@@ -19,7 +19,7 @@ Leet Lock is a productivity-focused Chrome extension designed to encourage consi
 - **Chrome Storage API**: Enables persistent data storage, such as the lock status, unlock expiration time, and user settings. Data retrieval and updates are efficiently managed using asynchronous operations with promises.
 - **Chrome Alarms API**: Schedules background tasks for daily locks and temporary unlocks. Implements event-driven programming by listening for alarm events to update the lock status and reset daily metrics.
 - **Chrome Runtime API**: Handles messaging between the background script and popup interface to synchronize lock status changes and user actions.
-- **LeetCode API**: Uses the [LeetCode API](https://github.com/faisal-shohag/leetcode_api) by Faisal Shohag to fetch the number of solved problems, with secure asynchronous requests made through `fetch()`.
+- **LeetCode API**: Uses the [LeetCode API](https://github.com/faisal-shohag/leetcode_api) by Faisal Shohag to fetch the number of solved problems
 
 ## Features
 
