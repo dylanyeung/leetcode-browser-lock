@@ -72,5 +72,5 @@ This project utilizes the [LeetCode API](https://github.com/faisal-shohag/leetco
 ## Contact Information
 For inquiries or feedback, please reach out through:
 - **Email:** [dylanyeung.dev@gmail.com](mailto:dylanyeung.dev@gmail.com)
-- **LinkedIn:** [LinkedIn Profile](https://www.linkedin.com/in/dylayeung/)
+- **LinkedIn:** [LinkedIn Profile](https://www.linkedin.com/in/dylanyeung/)
 - **GitHub:** [GitHub Profile](https://github.com/dylanyeung)
