@@ -27,10 +27,11 @@ Leet Lock is a productivity-focused Chrome extension designed to encourage consi
 - **Manual Unlock**: Allows users to manually unlock the browser for 30 minutes once per day, with a countdown displayed in the extension's popup.
 - **Automatic Unlock**: If a new LeetCode problem is solved, the browser automatically unlocks.
 
-![Default UI](https://raw.githubusercontent.com/dylanyeung/leetcode-browser-lock/main/assets/ui1.png)
-![Username Set UI](https://raw.githubusercontent.com/dylanyeung/leetcode-browser-lock/main/assets/ui2.png)
-![Free Unlock UI](https://raw.githubusercontent.com/dylanyeung/leetcode-browser-lock/main/assets/ui3.png)
-
+<div style="display: flex; justify-content: space-around;">
+    <img src="https://raw.githubusercontent.com/dylanyeung/leetcode-browser-lock/main/assets/ui1.png" alt="Default UI" style="height: 530px; object-fit: cover;">
+    <img src="https://raw.githubusercontent.com/dylanyeung/leetcode-browser-lock/main/assets/ui2.png" alt="Username Set UI" style="height: 530px; object-fit: cover;">
+    <img src="https://raw.githubusercontent.com/dylanyeung/leetcode-browser-lock/main/assets/ui3.png" alt="Free Unlock UI" style="height: 530px; object-fit: cover;">
+</div>
 
 ### LeetCode Integration
 - **Problem-Solving Tracking**: Retrieves the user's total number of solved LeetCode problems through LeetCode API and updates the lock status based on their activity.
