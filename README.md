@@ -1,7 +1,9 @@
 # Leet Lock Chrome Extension
 
 Leet Lock is a productivity-focused Chrome extension designed to encourage consistent LeetCode problem-solving. The extension locks browsing access, allowing users to manually unlock the browser for a limited time once daily or automatically unlock it upon solving a new LeetCode problem. When locked, the browser will redirect you if any website other than LeetCode and Google are visited. It provides an engaging way to stay motivated and track daily progress, integrating seamlessly with Chrome's API ecosystem.
+<br/><br/>
 Future plans for the project include integration of Stripe payments to allow for additional browser unlocking.
+<br/>
 The Leet Lock extension is in the process of being published and currently pending review on the Chrome Web Store.
 
 ## Table of Contents
