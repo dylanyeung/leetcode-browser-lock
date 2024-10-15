@@ -1,5 +1,5 @@
 const LEETCODE_DOMAIN = "leetcode.com";
-const domainWhiteList = ["leetcode.com", "google.com", "chrome://"];
+const domainWhiteList = ["leetcode.com", "google.com"]; //"chrome://"];
 const API_BASE_URL = "https://leetcode-api-faisalshohag.vercel.app/";
 let lastTotalSolved = 0; // Assume this will be loaded from storage
 
