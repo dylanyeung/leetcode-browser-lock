@@ -43,15 +43,10 @@ document.addEventListener("DOMContentLoaded", async function () {
     // Create a better formatted alarm text
     const hourLabel = hoursUntilAlarm === 1 ? "hour" : "hours";
     const minuteLabel = minutesUntilAlarm === 1 ? "minute" : "minutes";
-
     dailyLockText.innerHTML = `The next lock will occur in <span class="time-remaining">
-      ${hoursUntilAlarm} ${hourLabel} ${
-      hoursUntilAlarm > 1 ? "hours" : "hour"
-    } and 
-      ${minutesUntilAlarm} ${minuteLabel} ${
-      minutesUntilAlarm > 1 ? "minutes" : "minute"
-    }</span>.\n<span class="scheduled-time">
-      ${formattedScheduledTime}</span>`;
+    ${hoursUntilAlarm} ${hourLabel} and
+    ${minutesUntilAlarm} ${minuteLabel}</span>.\n<span class="scheduled-time">
+    ${formattedScheduledTime}</span>`;
   } else {
     console.log("no alarm exists");
     dailyLockText.textContent = "No alarm scheduled.";
