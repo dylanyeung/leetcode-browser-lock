@@ -1,8 +1,8 @@
 {
     "manifest_version": 3,
     "name": "Leet Lock",
-    "version": "1.0",
-    "description": "A browser lock that requires solving a LeetCode problem before being able to access other sites.",
+    "version": "1.0.1",
+    "description": "A browser lock that restricts website access until you've successfully solved a LeetCode problem.",
     "permissions": ["tabs", "storage", "alarms"],
     "background": {
       "service_worker": "background.js"
