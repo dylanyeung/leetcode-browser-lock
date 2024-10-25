@@ -4,7 +4,7 @@ Leet Lock is a productivity-focused Chrome extension designed to encourage consi
 <br/><br/>
 Future plans for the project include integration of Stripe payments to allow for additional browser unlocking.
 <br/>
-The Leet Lock extension is in the process of being published and currently pending review on the Chrome Web Store.
+The Leet Lock extension published on the [Chrome Web Store](https://chromewebstore.google.com/detail/leet-lock/enegdnbonjboopnibahbdnfbhbkmghcm)
 
 ## Table of Contents
 - [Technology Stack](#technology-stack)
